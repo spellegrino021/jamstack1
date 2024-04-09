@@ -1,0 +1,47 @@
+name: Trigger auto deployment for container-app-irq4fmt7dknek
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ master ]
+    paths:
+    - '//**'
+    - '.github/workflows/container-app-irq4fmt7dknek-AutoDeployTrigger-a126cdc7-e2b9-4806-9699-4251f6860b42.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.CONTAINERAPPIRQ4FMT7DKNEK_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.CONTAINERAPPIRQ4FMT7DKNEK_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.CONTAINERAPPIRQ4FMT7DKNEK_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: containerregistryirq4fmt7dknek.azurecr.io
+          registryUsername: ${{ secrets.CONTAINERAPPIRQ4FMT7DKNEK_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.CONTAINERAPPIRQ4FMT7DKNEK_REGISTRY_PASSWORD }}
+          containerAppName: container-app-irq4fmt7dknek
+          resourceGroup: jamstack19f28
+          imageToBuild: containerregistryirq4fmt7dknek.azurecr.io/container-app-irq4fmt7dknek:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
